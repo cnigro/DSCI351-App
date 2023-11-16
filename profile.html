@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quicksand&display=swap">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<style>
+    body {
+        display: flex;
+        font-family: 'Quicksand', sans-serif;
+        margin: 0;
+    }
+
+    .sidebar {
+        height: 100vh;
+        width: 20px;
+        background-color: gray;
+        padding: 20px;
+        position: fixed;
+        transition: width 0.3s;
+    }
+
+    .sidebar:hover {
+        width: 200px;
+    }
+
+    .sidebar:hover a{
+        opacity: 1;
+    }
+
+    .sidebar a {
+        text-decoration: none;
+        color: white;
+        display: block;
+        margin-bottom: 10px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .sidebar a:hover {
+        text-decoration: underline;
+    }
+
+    .container {
+        margin-left: 50px;
+        padding: 20px;
+        transition: margin-left 0.3s;
+    }
+
+    .sidebar:hover + .container {
+        margin-left: 220px;
+    }
+
+    h1 {
+        text-align: center;
+        padding: 20px;
+    }
+
+    .thumbnails {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-gap: 15px;
+    }
+
+    .gallery__item {
+        position: relative;
+        grid-column: span 1;
+        grid-row: span 30;
+    }
+
+    .thumbnail__img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+
+   .overlay {
+        background-color: rgba(0, 0, 0, 0.6);
+        color: #FFF;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column; /* Ensure a vertical layout */
+        justify-content: flex-end; /* Align items at the end */
+        padding: 10px; /* Add some padding for better readability */
+        opacity: 0.6;
+    }
+
+    .gallery__item:hover .overlay {
+        visibility: visible;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .toggle-bar {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    background-color: #f0f0f0;
+    padding: 10px;
+}
+
+.toggle-icon {
+    margin-right: 5px;
+}
+
+#add-entry-form-fields {
+    display: none;
+}
+
+#add-entry-form-fields.active {
+    display: block;
+}
+.toggle-bar-edit {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    background-color: #f0f0f0;
+    padding: 10px;
+}
+
+.toggle-icon {
+    margin-right: 5px;
+}
+
+#edit-profile-fields {
+    display: none;
+}
+
+#edit-profile-fields.active {
+    display: block;
+}
+</style>
+<body>
+    <div class="sidebar">
+        <a href="home.html"><em>Home</em></a>
+        <a href="profile.html"><em>Profile</em></a>
+        <a href="content.html"><em>Content</em></a>
+    </div>
+
+    <div class="container">
+        <h1>Welcome, {{ user }}!</h1>
+
+        <h2>Your Most Recent Travel History</h2>
+
+        <div class="thumbnails">
+            <!-- Sample entries, replace with your dynamic data -->
+            <div class="gallery__item">
+                <img src="{{ entry.image_url }}" alt="{{ entry.location }}" class="thumbnail__img">
+                <div class="overlay">
+                    <p><b>{{ entry.location }} | {{ entry.rating }} / 10</b></p>
+                    <p>{{ entry.comments }}</p>
+                </div>
+            </div>
+
+            <div class="gallery__item">
+                <img src="{{ entry.image_url }}" alt="{{ entry.location }}" class="thumbnail__img">
+                <div class="overlay">
+                    <p><b>{{ entry.location }} | {{ entry.rating }} / 10</b></p>
+                    <p>{{ entry.comments }}</p>
+                </div>
+            </div>
+
+            <div class="gallery__item">
+                <img src="{{ entry.image_url }}" alt="{{ entry.location }}" class="thumbnail__img">
+                <div class="overlay">
+                    <p><b>{{ entry.location }} | {{ entry.rating }} / 10</b></p>
+                    <p>{{ entry.comments }}</p>
+                </div>
+            </div>
+
+            <div class="gallery__item">
+                <img src="{{ entry.image_url }}" alt="{{ entry.location }}" class="thumbnail__img">
+                <div class="overlay">
+                    <p><b>{{ entry.location }} | {{ entry.rating }} / 10</b></p>
+                    <p>{{ entry.comments }}</p>
+                </div>
+            </div>
+
+        </div> <!-- .thumbnails -->
+
+        <div class="toggle-bar" tabindex="0">
+            <span class="toggle-icon">&#9660;</span> Add New Travel Entry
+        </div>
+        <form id="add-entry-form-fields" action="/add_travel" method="post" class="hidden">
+            <div class="form-group">
+                <label for="date">Date:</label>
+                <input type="text" class="form-control" name="date" required placeholder="YYYY-MM-DD">
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location:</label>
+                <input type="text" class="form-control" name="location" required placeholder="Los Angeles, California">
+            </div>
+
+            <div class="form-group">
+                <label for="rating">Trip Rating (1-10):</label>
+                <input type="number" class="form-control" name="rating" min="1" max="10" required placeholder="1-10">
+            </div>
+
+            <div class="form-group">
+                <label for="image">Image URL: </label>
+                <input type="text" class="form-control" name="image" required>
+            </div>
+
+            <div class="form-group">
+                <label for="comments">Comments:</label>
+                <textarea class="form-control" name="comments"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Add Travel Entry</button>
+        </form>
+        <div class="toggle-bar-edit" tabindex="0">
+            <span class="toggle-icon">&#9660;</span> Edit Profile
+        </div>
+        <form id="edit-profile-fields" action="/update_profile" method="post" class="hidden">
+            <div class="form-group">
+                <label for="current-username">Current Username:</label>
+                <input type="text" class="form-control" name="current-username" required placeholder="Current Username">
+            </div>
+
+            <div class="form-group">
+                <label for="current-password">Current Password:</label>
+                <input type="password" class="form-control" name="current-password" required placeholder="Current Password">
+            </div>
+
+            <div class="form-group">
+                <label for="new-username">New Username:</label>
+                <input type="text" class="form-control" name="new-username" placeholder="New Username">
+            </div>
+
+            <div class="form-group">
+                <label for="new-password">New Password:</label>
+                <input type="password" class="form-control" name="new-password" placeholder="New Password">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+
+        <a href="/logout">Logout</a>
+    </div>
+</body>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggleBar = document.querySelector('.toggle-bar');
+        const formFields = document.getElementById('add-entry-form-fields');
+
+        toggleBar.addEventListener('click', function () {
+            formFields.classList.toggle('active');
+            if (formFields.classList.contains('active')) {
+                toggleBar.querySelector('.toggle-icon').innerHTML = '&#9650;'; // Up arrow
+            } else {
+                toggleBar.querySelector('.toggle-icon').innerHTML = '&#9660;'; // Down arrow
+            }
+        });
+    });
+        document.addEventListener("DOMContentLoaded", function () {
+        const toggleBarEdit = document.querySelector('.toggle-bar-edit');
+        const editProfileFields = document.getElementById('edit-profile-fields');
+
+        toggleBarEdit.addEventListener('click', function () {
+            editProfileFields.classList.toggle('active');
+            if (editProfileFields.classList.contains('active')) {
+                toggleBarEdit.querySelector('.toggle-icon').innerHTML = '&#9650;'; // Up arrow
+            } else {
+                toggleBarEdit.querySelector('.toggle-icon').innerHTML = '&#9660;'; // Down arrow
+            }
+        });
+    });
+</script>
+</html>

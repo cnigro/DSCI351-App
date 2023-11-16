@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel History</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quicksand&display=swap">
+<style>
+    body {
+        margin: 0;
+        font-family: 'Quicksand', sans-serif;
+    }
+
+    .sidebar {
+        height: 100vh;
+        width: 20px;
+        background-color: grey;
+        padding: 20px;
+        position: fixed;
+        transition: width 0.3s;
+        overflow: hidden;
+    }
+
+    .sidebar:hover {
+        width: 200px;
+    }
+
+    .sidebar:hover a{
+        opacity: 1;
+    }
+
+    .sidebar a {
+        text-decoration: none;
+        color: white;
+        display: block;
+        margin-bottom: 10px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .sidebar a:hover {
+        text-decoration: underline;
+    }
+
+    .content-container {
+        transition: margin-left 0.3s;
+        margin-left: 50px;
+        padding: 20px;
+    }
+
+    .sidebar:hover + .content-container {
+        margin-left: 260px;
+    }
+
+    h1 {
+        text-align: center;
+        padding: 20px;
+    }
+
+    .thumbnails {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-gap: 15px;
+    }
+
+    .gallery__item {
+        position: relative;
+        grid-column: span 1;
+        grid-row: span 30;
+    }
+
+    .thumbnail__img {
+        width: 100%;
+        height: 75%; /* Set the height to 70% */
+        object-fit: cover;
+    }
+
+    .overlay {
+        background-color: rgba(0, 0, 0, 0.6);
+        color: #FFF;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column; /* Ensure a vertical layout */
+        justify-content: flex-end; /* Align items at the end */
+        padding: 10px; /* Add some padding for better readability */
+        opacity: 0.6;
+    }
+
+    .gallery__item:hover .overlay {
+        visibility: visible;
+    }
+
+    .filter-bar {
+        text-align: right;
+        margin-bottom: 20px;
+        padding-right: 50px;
+    }
+</style>
+
+
+</head>
+<body>
+    <div class="sidebar">
+        <a href="home.html"><em>Home</em></a>
+        <a href="profile.html"><em>Profile</em></a>
+        <a href="content.html"><em>Content</em></a>
+    </div>
+    <div class="content-container">
+        <h1>Travel History</h1>
+        <div class="filter-bar">
+            <label for="sort-by">Sort by:</label>
+            <select id="sort-by">
+                <option value="date">Date Asc</option>
+                <option value="date">Date Desc</option>
+                <option value="rating">Rating Asc</option>
+                <option value="rating">Rating Desc</option>
+            </select>
+            <label for="sort-by-loc">Filter through location:</label>
+                <input type="text" id="location-input" placeholder="Enter location">
+                <button onclick="searchByLocation()" id="search-location-btn">Search</button>
+            <label for="thumbnail-count">Number of Thumbnails:</label>
+            <input type="number" id="thumbnail-count" value="4" min="1" max="12">
+            <button onclick="updateThumbnails()" id="update-thumbnails-btn">Update Thumbnails</button>
+        </div> <!-- .filter-bar -->
+        <div class="thumbnails" id="thumbnail-container">
+            <!-- Thumbnails will be dynamically loaded here -->
+        </div> <!-- .thumbnail -->
+    </div> <!-- .content-container -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+ <script>
+    $(document).ready(function () {
+        updateThumbnails(); // Call the function when the document is ready
+
+        // Add an event listener for the button click
+        $('#update-thumbnails-btn').on('click', function () {
+            updateThumbnails();
+        });
+
+        function updateThumbnails() {
+            const thumbnailCount = $('#thumbnail-count').val();
+            const sortValue = $('#sort-by').val();
+
+            // Mock data for testing, replace with your actual data retrieval logic
+            const entries = [
+                { image_url: 'https://www.usc.edu/wp-content/uploads/2023/03/48244572917_c36112db94_o-1-scaled.jpg', location: 'Location 1', date: '01-02-2023', rating: 8, comments: 'Beautiful place' },
+                { image_url: 'https://assets.editorial.aetnd.com/uploads/2019/02/topic-los-angeles-gettyimages-943489042-feature.jpg?width=768', location: 'Location 1', date: '01-03-2023', rating: 7, comments: 'Beautiful place' },
+                { image_url: 'image1.jpg', location: 'Location 1', date: '01-04-2023', rating: 3, comments: 'Beautiful place' },
+                { image_url: 'image1.jpg', location: 'Location 1', date: '01-05-2023', rating: 2, comments: 'Beautiful place' },
+                { image_url: 'image1.jpg', location: 'Location 1', date: '01-06-2023', rating: 1, comments: 'Beautiful place' },
+                { image_url: 'image1.jpg', location: 'Location 1', date: '01-07-2023', rating: 6, comments: 'Beautiful place' },
+                { image_url: 'image1.jpg', location: 'Location 1', date: '01-08-2023', rating: 9, comments: 'Beautiful place' },
+                { image_url: 'image1.jpg', location: 'Location 1', date: '01-09-2023', rating: 1, comments: 'Beautiful place' },
+                { image_url: 'image1.jpg', location: 'Location 1', date: '01-10-2023', rating: 2, comments: 'Beautiful place' },
+                { image_url: 'image1.jpg', location: 'Location 1', date: '01-11-2023', rating: 5, comments: 'Beautiful place' },
+                { image_url: 'image1.jpg', location: 'Location 1', date: '01-12-2023', rating: 3, comments: 'Beautiful place' },
+                { image_url: 'image1.jpg', location: 'Location 1', date: '01-18-2023', rating: 4, comments: 'Beautiful place' }
+            ];
+
+            const thumbnailsHTML = entries.slice(0, thumbnailCount).map(entry => `
+                <div class="gallery__item">
+                    <img src="${entry.image_url}" alt="${entry.location}" class="thumbnail__img">
+                    <div class="overlay">
+                        <p><b>${entry.location} | ${entry.date} | ${entry.rating} out of 10 </b></p>
+                        <p>${entry.comments}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            // Update the thumbnails container
+            $('#thumbnail-container').html(thumbnailsHTML);
+        }
+    });
+    function searchByLocation() {
+    const locationQuery = $('#location-input').val();
+
+    // Make an AJAX request to Flask route for search functionality
+    $.ajax({
+        url: '/search',
+        method: 'GET',
+        data: { location: locationQuery },
+        success: function (data) {
+            // Handle the received data to update thumbnails
+            const filteredThumbnailsHTML = data.map(entry => `
+                <div class="gallery__item">
+                    <div class="gallery__item">
+                    <img src="${entry.image_url}" alt="${entry.location}" class="thumbnail__img">
+                    <div class="overlay">
+                        <p><b>${entry.location} | ${entry.date} | ${entry.rating} out of 10 </b></p>
+                        <p>${entry.comments}</p>
+                    </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Update the thumbnails container
+            $('#thumbnail-container').html(filteredThumbnailsHTML);
+        },
+        error: function (error) {
+            console.error('Error:', error);
+        }
+    });
+}
+</script>
+</body>
+</html>
