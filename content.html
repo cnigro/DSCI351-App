@@ -78,6 +78,7 @@
 
     .overlay {
         background-color: rgba(0, 0, 0, 0.6);
+        font-size: smaller;
         color: #FFF;
         position: absolute;
         top: 0;
@@ -106,20 +107,23 @@
 </head>
 <body>
     <div class="sidebar">
-        <a href="home.html"><em>Home</em></a>
-        <a href="profile.html"><em>Profile</em></a>
-        <a href="content.html"><em>Content</em></a>
+        <a href="{{ url_for('home') }}"><em>Home</em></a>
+        <a href="{{ url_for('profile') }}"><em>Profile</em></a>
+        <a href="{{ url_for('content') }}"><em>Content</em></a>
     </div>
     <div class="content-container">
         <h1>Travel History</h1>
         <div class="filter-bar">
             <label for="sort-by">Sort by:</label>
             <select id="sort-by">
-                <option value="date">Date Asc</option>
-                <option value="date">Date Desc</option>
-                <option value="rating">Rating Asc</option>
-                <option value="rating">Rating Desc</option>
+                <option value="date">Date</option>
+                <option value="rating">Rating</option>
             </select>
+            <select id="sort-order">
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
+            </select>
+            <button onclick="sortThumbnails()" id="sort-thumbnails-btn">Sort</button>
             <label for="sort-by-loc">Filter through location:</label>
                 <input type="text" id="location-input" placeholder="Enter location">
                 <button onclick="searchByLocation()" id="search-location-btn">Search</button>
@@ -128,83 +132,96 @@
             <button onclick="updateThumbnails()" id="update-thumbnails-btn">Update Thumbnails</button>
         </div> <!-- .filter-bar -->
         <div class="thumbnails" id="thumbnail-container">
-            <!-- Thumbnails will be dynamically loaded here -->
-        </div> <!-- .thumbnail -->
-    </div> <!-- .content-container -->
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
- <script>
-    $(document).ready(function () {
-        updateThumbnails(); // Call the function when the document is ready
-
-        // Add an event listener for the button click
-        $('#update-thumbnails-btn').on('click', function () {
-            updateThumbnails();
-        });
-
-        function updateThumbnails() {
-            const thumbnailCount = $('#thumbnail-count').val();
-            const sortValue = $('#sort-by').val();
-
-            // Mock data for testing, replace with your actual data retrieval logic
-            const entries = [
-                { image_url: 'https://www.usc.edu/wp-content/uploads/2023/03/48244572917_c36112db94_o-1-scaled.jpg', location: 'Location 1', date: '01-02-2023', rating: 8, comments: 'Beautiful place' },
-                { image_url: 'https://assets.editorial.aetnd.com/uploads/2019/02/topic-los-angeles-gettyimages-943489042-feature.jpg?width=768', location: 'Location 1', date: '01-03-2023', rating: 7, comments: 'Beautiful place' },
-                { image_url: 'image1.jpg', location: 'Location 1', date: '01-04-2023', rating: 3, comments: 'Beautiful place' },
-                { image_url: 'image1.jpg', location: 'Location 1', date: '01-05-2023', rating: 2, comments: 'Beautiful place' },
-                { image_url: 'image1.jpg', location: 'Location 1', date: '01-06-2023', rating: 1, comments: 'Beautiful place' },
-                { image_url: 'image1.jpg', location: 'Location 1', date: '01-07-2023', rating: 6, comments: 'Beautiful place' },
-                { image_url: 'image1.jpg', location: 'Location 1', date: '01-08-2023', rating: 9, comments: 'Beautiful place' },
-                { image_url: 'image1.jpg', location: 'Location 1', date: '01-09-2023', rating: 1, comments: 'Beautiful place' },
-                { image_url: 'image1.jpg', location: 'Location 1', date: '01-10-2023', rating: 2, comments: 'Beautiful place' },
-                { image_url: 'image1.jpg', location: 'Location 1', date: '01-11-2023', rating: 5, comments: 'Beautiful place' },
-                { image_url: 'image1.jpg', location: 'Location 1', date: '01-12-2023', rating: 3, comments: 'Beautiful place' },
-                { image_url: 'image1.jpg', location: 'Location 1', date: '01-18-2023', rating: 4, comments: 'Beautiful place' }
-            ];
-
-            const thumbnailsHTML = entries.slice(0, thumbnailCount).map(entry => `
-                <div class="gallery__item">
-                    <img src="${entry.image_url}" alt="${entry.location}" class="thumbnail__img">
-                    <div class="overlay">
-                        <p><b>${entry.location} | ${entry.date} | ${entry.rating} out of 10 </b></p>
-                        <p>${entry.comments}</p>
-                    </div>
+            {% for entry in entry%}
+            <div class="gallery__item">
+                <img src="{{ entry.imageURL.strip('\'') }}" alt="{{ entry.location }}" class="thumbnail__img">
+                <div class="overlay">
+                    <p><b>{{ entry.date }} | {{ entry.location }} | {{ entry.rating }} / 10</b></p>
+                    <p>{{ entry.comments }}</p>
                 </div>
-            `).join('');
+            </div>
+            {% endfor %}
+        </div> <!-- .thumbnails -->
+    </div><!-- .content -->
 
-            // Update the thumbnails container
-            $('#thumbnail-container').html(thumbnailsHTML);
-        }
-    });
-    function searchByLocation() {
-    const locationQuery = $('#location-input').val();
-
-    // Make an AJAX request to Flask route for search functionality
-    $.ajax({
-        url: '/search',
-        method: 'GET',
-        data: { location: locationQuery },
-        success: function (data) {
-            // Handle the received data to update thumbnails
-            const filteredThumbnailsHTML = data.map(entry => `
-                <div class="gallery__item">
-                    <div class="gallery__item">
-                    <img src="${entry.image_url}" alt="${entry.location}" class="thumbnail__img">
-                    <div class="overlay">
-                        <p><b>${entry.location} | ${entry.date} | ${entry.rating} out of 10 </b></p>
-                        <p>${entry.comments}</p>
-                    </div>
-                    </div>
-                </div>
-            `).join('');
-
-            // Update the thumbnails container
-            $('#thumbnail-container').html(filteredThumbnailsHTML);
-        },
-        error: function (error) {
-            console.error('Error:', error);
-        }
-    });
-}
-</script>
 </body>
+<script>
+function sortThumbnails() {
+  const sortBy = document.getElementById('sort-by').value;
+  const sortOrder = document.getElementById('sort-order').value;
+  const thumbnails = Array.from(document.querySelectorAll('.gallery__item'));
+
+  thumbnails.sort((a, b) => {
+    const entryA = {
+      date: a.dataset.date,
+      rating: parseInt(a.dataset.rating)
+    };
+    const entryB = {
+      date: b.dataset.date,
+      rating: parseInt(b.dataset.rating)
+    };
+
+    let result = 0;
+    if (sortBy === 'date') {
+      result = sortByDate(entryA, entryB);
+    } else if (sortBy === 'rating') {
+      result = sortByRating(entryA, entryB);
+    }
+
+    return sortOrder === 'asc' ? result : -result;
+  });
+
+  const thumbnailContainer = document.getElementById('thumbnail-container');
+  thumbnailContainer.innerHTML = '';
+
+  thumbnails.forEach(thumbnail => {
+    thumbnailContainer.appendChild(thumbnail);
+  });
+}
+
+function sortByDate(entryA, entryB) {
+  const dateA = new Date(entryA.date);
+  const dateB = new Date(entryB.date);
+
+  if (dateA < dateB) return -1;
+  if (dateA > dateB) return 1;
+  return 0;
+}
+
+function sortByRating(entryA, entryB) {
+  return entryA.rating - entryB.rating;
+}
+
+document.getElementById('sort-thumbnails-btn').addEventListener('click', sortThumbnails);
+
+  function updateThumbnails() {
+    const thumbnailCount = parseInt(document.getElementById('thumbnail-count').value);
+    const thumbnails = document.querySelectorAll('.gallery__item');
+
+    thumbnails.forEach((thumbnail, index) => {
+      if (index < thumbnailCount) {
+        thumbnail.style.display = 'block';
+      } else {
+        thumbnail.style.display = 'none';
+      }
+    });
+  }
+  function searchByLocation() {
+    const locationInput = document.getElementById('location-input').value.toLowerCase();
+    const thumbnails = document.querySelectorAll('.gallery__item');
+
+    thumbnails.forEach(thumbnail => {
+      const thumbnailLocation = thumbnail.querySelector('.thumbnail__img').getAttribute('alt').toLowerCase();
+      if (thumbnailLocation.includes(locationInput)) {
+        thumbnail.style.display = 'block';
+      } else {
+        thumbnail.style.display = 'none';
+      }
+    });
+  }
+
+
+  document.getElementById('search-location-btn').addEventListener('click', searchByLocation);
+  document.getElementById('update-thumbnails-btn').addEventListener('click', updateThumbnails);
+</script>
 </html>

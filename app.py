@@ -1,7 +1,11 @@
+from boto3.dynamodb.conditions import Key
 from flask import Flask, render_template, request, redirect, url_for, session
 import boto3
+import uuid
+import bcrypt
 
 app = Flask(__name__)
+app.secret_key = 'ABCDEFG123456789'
 
 aws_region = 'us-west-1'
 access_key = ''
@@ -21,17 +25,18 @@ def home():
 
 
 # Route for user registration
-@app.route('/register', methods=['POST'])
+@app.route('/action/register', methods=['POST'])
 def register():
     if request.method == "POST":
         username = request.form["new-username"]
         password = request.form["new-password"]
         reentered_password = request.form["reenter-new-password"]
+
         if password == reentered_password:
             result = db_create_user(username, password)
             if result == "User created successfully":
                 session["username"] = username
-                return redirect(url_for("profile"))
+                return redirect(url_for('profile'))
             else:
                 return render_template('home.html', error=result)
         else:
@@ -39,23 +44,22 @@ def register():
 
 
 # Route for user login
-@app.route('/login', methods=['POST'])
+@app.route('/action/login', methods=['POST'])
 def login():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
         if db_check_creds(username, password):
             session["username"] = username
-            return redirect(url_for("profile"))
+            return redirect(url_for('profile'))
         else:
             return render_template('home.html', error="Invalid credentials")
 
 
 # Route for user logout
-@app.route('/logout')
-def logout():
-    session.pop('username', None)
-    return redirect(url_for('home'))
+@app.route('/update_profile')
+def update_user():
+    return False
 
 
 # Route for user profile
@@ -63,29 +67,34 @@ def logout():
 def profile():
     if 'username' in session:
         username = session['username']
-        items = get_user_items(username)
-        return render_template('profile.html', username=username, items=items)
+        items = get_user_items()
+        return render_template('profile.html', user=username, entry=items)
     else:
         return redirect(url_for('home'))
 
 
-# Route for adding a new travel entry
-@app.route('/add_travel', methods=['POST'])
+@app.route('/content')
+def content():
+    items = get_user_items()
+    return render_template('content.html', entry=items)
+
+
+@app.route('/action/add_travel', methods=['POST'])
 def add_travel():
-    if 'username' in session:
-        username = session['username']
-        data = {
-            'date': request.form['date'],
-            'user': username,
-            'location': request.form['location'],
-            'rating': int(request.form['rating']),
-            'comments': request.form['comments'],
-            'image_url': request.form['image']
-        }
-        travel_table.put_item(Item=data)
-        return redirect(url_for('profile'))
-    else:
-        return redirect(url_for('home'))
+    username = session.get('username')
+    unique_id = f'{username}-{uuid.uuid4()}'
+    travel_table.put_item(
+                      Item={
+                          'date': request.form['date'],
+                          'comments': request.form['comments'],
+                          'TripID': unique_id,
+                          'imageURL': request.form['image'],
+                          'location': request.form['location'],
+                          'rating': int(request.form['rating']),
+                          'username': username
+                      }
+                      )
+    return redirect(url_for('profile'))
 
 
 # Function to check user credentials
@@ -98,19 +107,31 @@ def db_check_creds(username, password):
     return False
 
 
+def get_user_items():
+    username = session.get('username')
+    response = travel_table.scan()
+    items = response.get('Items', [])
+
+    user_items = [item for item in items if item.get('username') == username]
+    print(user_items)
+    return user_items
+
+
 # Function to create a new user
 def db_create_user(username, password):
+    # Check if the username already exists
     response = user_table.get_item(Key={'username': username})
     if 'Item' in response:
-        return "Username already exists"
-    user_table.put_item(Item={'username': username, 'password': password})
-    return "User created successfully"
+        return False, "Username already exists"
 
-
-# Function to get user's travel history
-def get_user_items(username):
-    response = travel_table.scan(FilterExpression=boto3.dynamodb.conditions.Attr('user').eq(username))
-    return response.get('Items', [])
+    # Store the user data in the table
+    try:
+        user_table.put_item(Item={'username': username, 'password': password})
+        return True, "User created successfully"
+    except Exception as e:
+        # Log the exception or handle it accordingly
+        print(f"Error creating user: {e}")
+        return False, "Failed to create user"
 
 
 if __name__ == '__main__':

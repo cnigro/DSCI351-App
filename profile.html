@@ -74,12 +74,13 @@
 
     .thumbnail__img {
         width: 100%;
-        height: auto;
+        height: 75%;
         object-fit: cover;
     }
 
    .overlay {
         background-color: rgba(0, 0, 0, 0.6);
+        font-size: smaller;
         color: #FFF;
         position: absolute;
         top: 0;
@@ -141,9 +142,9 @@
 </style>
 <body>
     <div class="sidebar">
-        <a href="home.html"><em>Home</em></a>
-        <a href="profile.html"><em>Profile</em></a>
-        <a href="content.html"><em>Content</em></a>
+        <a href="{{ url_for('home') }}"><em>Home</em></a>
+        <a href="{{ url_for('profile') }}"><em>Profile</em></a>
+        <a href="{{ url_for('content') }}"><em>Content</em></a>
     </div>
 
     <div class="container">
@@ -153,44 +154,22 @@
 
         <div class="thumbnails">
             <!-- Sample entries, replace with your dynamic data -->
+            {% for entry in entry[:4]|sort(attribute='date', reverse=true) %}
             <div class="gallery__item">
-                <img src="{{ entry.image_url }}" alt="{{ entry.location }}" class="thumbnail__img">
+                <img src="{{ entry.imageURL.strip('\'') }}" alt="{{ entry.location }}" class="thumbnail__img">
                 <div class="overlay">
-                    <p><b>{{ entry.location }} | {{ entry.rating }} / 10</b></p>
+                    <p><b>{{ entry.date }} | {{ entry.location }} | {{ entry.rating }} / 10</b></p>
                     <p>{{ entry.comments }}</p>
                 </div>
             </div>
-
-            <div class="gallery__item">
-                <img src="{{ entry.image_url }}" alt="{{ entry.location }}" class="thumbnail__img">
-                <div class="overlay">
-                    <p><b>{{ entry.location }} | {{ entry.rating }} / 10</b></p>
-                    <p>{{ entry.comments }}</p>
-                </div>
-            </div>
-
-            <div class="gallery__item">
-                <img src="{{ entry.image_url }}" alt="{{ entry.location }}" class="thumbnail__img">
-                <div class="overlay">
-                    <p><b>{{ entry.location }} | {{ entry.rating }} / 10</b></p>
-                    <p>{{ entry.comments }}</p>
-                </div>
-            </div>
-
-            <div class="gallery__item">
-                <img src="{{ entry.image_url }}" alt="{{ entry.location }}" class="thumbnail__img">
-                <div class="overlay">
-                    <p><b>{{ entry.location }} | {{ entry.rating }} / 10</b></p>
-                    <p>{{ entry.comments }}</p>
-                </div>
-            </div>
+            {% endfor %}
 
         </div> <!-- .thumbnails -->
 
         <div class="toggle-bar" tabindex="0">
             <span class="toggle-icon">&#9660;</span> Add New Travel Entry
         </div>
-        <form id="add-entry-form-fields" action="/add_travel" method="post" class="hidden">
+        <form id="add-entry-form-fields" action="/action/add_travel" method="POST" class="hidden">
             <div class="form-group">
                 <label for="date">Date:</label>
                 <input type="text" class="form-control" name="date" required placeholder="YYYY-MM-DD">
@@ -221,7 +200,7 @@
         <div class="toggle-bar-edit" tabindex="0">
             <span class="toggle-icon">&#9660;</span> Edit Profile
         </div>
-        <form id="edit-profile-fields" action="/update_profile" method="post" class="hidden">
+        <form id="edit-profile-fields" action="/update_profile" method="POST" class="hidden">
             <div class="form-group">
                 <label for="current-username">Current Username:</label>
                 <input type="text" class="form-control" name="current-username" required placeholder="Current Username">
