@@ -124,13 +124,6 @@
     #add-entry-form-fields.active {
         display: block;
     }
-    .toggle-bar-edit {
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        background-color: #f0f0f0;
-        padding: 10px;
-    }
 
     .toggle-bar-travel-edit {
         cursor: pointer;
@@ -181,7 +174,6 @@
         <a href="{{ url_for('home') }}"><em>Home</em></a>
         <a href="{{ url_for('profile') }}"><em>Profile</em></a>
         <a href="{{ url_for('content') }}"><em>Content</em></a>
-        <a href="{{ url_for('restaurants') }}"><em>Restaurants</em></a>
     </div>
 
     <div class="container">
@@ -279,39 +271,9 @@
 
             <button type="submit" class="btn btn-primary">Edit Travel Entry</button>
         </form>
-        <div class="toggle-bar-edit" tabindex="0">
-            <span class="toggle-icon">&#9660;</span> Edit Profile
-        </div>
-        <form id="edit-profile-fields" action="/update_profile" method="POST" class="hidden">
-            <div class="form-group">
-                <label for="current-username">Current Username:</label>
-                <input type="text" class="form-control" name="current-username" required placeholder="Current Username">
-            </div>
 
-            <div class="form-group">
-                <label for="current-password">Current Password:</label>
-                <input type="password" class="form-control" name="current-password" required placeholder="Current Password">
-            </div>
 
-            <div class="form-group">
-                <label for="new-username">New Username:</label>
-                <input type="text" class="form-control" name="new-username" placeholder="New Username">
-            </div>
-
-            <div class="form-group">
-                <label for="new-password">New Password:</label>
-                <input type="password" class="form-control" name="new-password" placeholder="New Password">
-            </div>
-
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-        </form>
-        <form action="/logout" method="POST">
-            <input type="submit" value="Log out">
-        </form>
-
-         <!--
         <a href="/logout">Logout</a>
-        -->
     </div>
 </body>
 <script>
