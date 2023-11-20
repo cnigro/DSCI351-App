@@ -36,7 +36,7 @@ def home():
 # Route for user registration
 @app.route('/action/register', methods=['POST'])
 def register():
-  """
+    """
     Gets called from the home.html form submit
     Adds a new user to the database
 
@@ -63,7 +63,7 @@ def register():
 # Route for user login
 @app.route('/action/login', methods=['POST'])
 def login():
-  """
+    """
     Gets called from home.html form submit
     Checks to see if the user credentials are correct
 
@@ -96,7 +96,7 @@ def logout():
 # Route for user profile
 @app.route('/profile')
 def profile():
-  """
+    """
     Displays the current user's items if they are logged in
 
     :return: renders profile if logged in and home otherwise
@@ -111,7 +111,7 @@ def profile():
 
 @app.route('/content')
 def content():
-  """
+    """
     Gets the user's items and displays them
 
     :return: renders content.html
@@ -122,7 +122,7 @@ def content():
 
 @app.route('/action/add_travel', methods=['POST'])
 def add_travel():
-  """
+    """
     Adds a new item to the dynamoDB table
 
     :return: Redirects back to profile so that the new item will be displayed
@@ -208,7 +208,7 @@ def add_restaurant():
 
 # Function to check user credentials
 def db_check_creds(username, password):
-  """
+    """
     Checks to see if the given credentials are correct
 
     :param username: username to check
@@ -229,7 +229,7 @@ def db_check_creds(username, password):
 
 
 def get_user_items():
-  """
+    """
     Gets the current users items from the travel table
 
     :return: The current users travel logs
@@ -245,7 +245,7 @@ def get_user_items():
 
 # Function to create a new user
 def db_create_user(username, password, name, age):
-  """
+    """
     Creates a user and adds them to the table
 
     :param username: username to add
