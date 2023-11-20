@@ -2,7 +2,6 @@ from boto3.dynamodb.conditions import Key
 from flask import Flask, render_template, request, redirect, url_for, session
 import boto3
 import uuid
-import bcrypt
 
 app = Flask(__name__)
 app.secret_key = 'ABCDEFG123456789'
@@ -84,16 +83,40 @@ def add_travel():
     username = session.get('username')
     unique_id = f'{username}-{uuid.uuid4()}'
     travel_table.put_item(
-                      Item={
-                          'date': request.form['date'],
-                          'comments': request.form['comments'],
-                          'TripID': unique_id,
-                          'imageURL': request.form['image'],
-                          'location': request.form['location'],
-                          'rating': int(request.form['rating']),
-                          'username': username
-                      }
-                      )
+        Item={
+            'date': request.form['date'],
+            'comments': request.form['comments'],
+            'TripID': unique_id,
+            'imageURL': request.form['image'],
+            'location': request.form['location'],
+            'rating': int(request.form['rating']),
+            'username': username
+        })
+    return redirect(url_for('profile'))
+
+
+@app.route('/action/edit_travel', methods=['POST'])
+def edit_travel():
+    travel_table.update_item(
+        Key={
+            'TripID': request.form['TripID']  # Specify the primary key of the item to update
+        },
+        UpdateExpression='SET #dt = :new_date, #cmt = :new_comments, #img = :new_image, #loc = :new_location, '
+                         '#rt = :new_rating',
+        ExpressionAttributeNames={
+            '#dt': 'date',
+            '#cmt': 'comments',
+            '#img': 'imageURL',
+            '#loc': 'location',
+            '#rt': 'rating'
+        },
+        ExpressionAttributeValues={
+            ':new_date': request.form['date'],
+            ':new_comments': request.form['comments'],
+            ':new_image': request.form['image'],
+            ':new_location': request.form['location'],
+            ':new_rating': int(request.form['rating'])
+        })
     return redirect(url_for('profile'))
 
 

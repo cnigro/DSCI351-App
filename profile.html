@@ -66,6 +66,10 @@
         grid-gap: 15px;
     }
 
+    .show-entries{
+        position: relative;
+    }
+
     .gallery__item {
         position: relative;
         grid-column: span 1;
@@ -107,38 +111,70 @@
     align-items: center;
     background-color: #f0f0f0;
     padding: 10px;
-}
+    }
 
-.toggle-icon {
-    margin-right: 5px;
-}
+    .toggle-icon {
+        margin-right: 5px;
+    }
 
-#add-entry-form-fields {
-    display: none;
-}
+    #add-entry-form-fields {
+        display: none;
+    }
 
-#add-entry-form-fields.active {
-    display: block;
-}
-.toggle-bar-edit {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    background-color: #f0f0f0;
-    padding: 10px;
-}
+    #add-entry-form-fields.active {
+        display: block;
+    }
+    .toggle-bar-edit {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        background-color: #f0f0f0;
+        padding: 10px;
+    }
 
-.toggle-icon {
-    margin-right: 5px;
-}
+    .toggle-bar-travel-edit {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        background-color: #f0f0f0;
+        padding: 10px;
+    }
 
-#edit-profile-fields {
-    display: none;
-}
+    .toggle-icon {
+        margin-right: 5px;
+    }
 
-#edit-profile-fields.active {
-    display: block;
-}
+    .toggle-edit-icon {
+        margin-right: 5px;
+    }
+
+    #edit-travel-form-fields {
+        display: none;
+    }
+
+    #edit-travel-form-fields.active {
+        display: block;
+    }
+
+    #edit-profile-fields {
+        display: none;
+    }
+
+    #edit-profile-fields.active {
+        display: block;
+    }
+    @media (max-width: 991px) {
+        .thumbnails {
+            grid-template-columns: repeat(2, 1fr); /* Display two thumbnails per row */
+        }
+    }
+
+    /* Mobile - Screen sizes <= 767px */
+    @media (max-width: 767px) {
+        .thumbnails {
+            grid-template-columns: 1fr; /* Display two thumbnails per row */
+        }
+    }
 </style>
 <body>
     <div class="sidebar">
@@ -197,6 +233,51 @@
 
             <button type="submit" class="btn btn-primary">Add Travel Entry</button>
         </form>
+        <div class="toggle-bar-travel-edit" tabindex="0">
+            <span class="toggle-edit-icon">&#9660;</span> Edit Travel Entry
+        </div>
+        <form id="edit-travel-form-fields" action="/action/edit_travel" method="POST" class="hidden">
+            <div class="container">
+                {% for entry in entry %}
+                <div class="show-entries">
+                    <p>TripID: {{ entry.TripID }}</p>
+                    <p>Date: {{ entry.date }} | Rating: {{ entry.rating }} | Location: {{ entry.location }} | Comments: {{ entry.comments }}</p>
+                    <p> ImageUrl: {{ entry.imageURL }} </p>
+                    <p>_____________________________________________________________________________________</p>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                <label for="TripID">TripID of Trip you would like to edit:</label>
+                <input type="text" class="form-control" name="TripID" required placeholder="TripID">
+            </div>
+            <div class="form-group">
+                <label for="date">Date:</label>
+                <input type="text" class="form-control" name="date" required placeholder="YYYY-MM-DD">
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location:</label>
+                <input type="text" class="form-control" name="location" required placeholder="Los Angeles, California">
+            </div>
+
+            <div class="form-group">
+                <label for="rating">Trip Rating (1-10):</label>
+                <input type="number" class="form-control" name="rating" min="1" max="10" required placeholder="1-10">
+            </div>
+
+            <div class="form-group">
+                <label for="image">Image URL: </label>
+                <input type="text" class="form-control" name="image" required>
+            </div>
+
+            <div class="form-group">
+                <label for="comments">Comments:</label>
+                <textarea class="form-control" name="comments"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Edit Travel Entry</button>
+        </form>
         <div class="toggle-bar-edit" tabindex="0">
             <span class="toggle-icon">&#9660;</span> Edit Profile
         </div>
@@ -254,5 +335,19 @@
             }
         });
     });
+    document.addEventListener("DOMContentLoaded", function () {
+    const toggleBarEdit = document.querySelector('.toggle-bar-travel-edit'); // Corrected selector
+    const editTravelFields = document.getElementById('edit-travel-form-fields'); // Corrected ID
+
+    toggleBarEdit.addEventListener('click', function () {
+        editTravelFields.classList.toggle('active');
+        if (editTravelFields.classList.contains('active')) {
+            toggleBarEdit.querySelector('.toggle-edit-icon').innerHTML = '&#9650;'; // Up arrow
+        } else {
+            toggleBarEdit.querySelector('.toggle-edit-icon').innerHTML = '&#9660;'; // Down arrow
+        }
+    });
+});
+
 </script>
 </html>
