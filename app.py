@@ -9,8 +9,8 @@ app = Flask(__name__)
 app.secret_key = 'ABCDEFG123456789'
 
 aws_region = 'us-west-1'
-access_key = 'AKIAX7ZJYPCAWAXD6LC3'
-secret_key = 'tuzyOqjVJDNWTR/q8pf1sHltZ8KEesyhdHZXw0bc'
+access_key = ''
+secret_key = ''
 
 # Replace 'your_access_key' and 'your_secret_key' with your AWS credentials
 dynamodb = boto3.resource('dynamodb', region_name=aws_region, aws_access_key_id=access_key,
