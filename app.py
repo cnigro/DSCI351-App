@@ -1,20 +1,27 @@
-from boto3.dynamodb.conditions import Key
 from flask import Flask, render_template, request, redirect, url_for, session
 import boto3
 import uuid
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import db as firebase_db
 
 app = Flask(__name__)
 app.secret_key = 'ABCDEFG123456789'
 
 aws_region = 'us-west-1'
-access_key = ''
-secret_key = ''
+access_key = 'AKIAX7ZJYPCAWAXD6LC3'
+secret_key = 'tuzyOqjVJDNWTR/q8pf1sHltZ8KEesyhdHZXw0bc'
 
 # Replace 'your_access_key' and 'your_secret_key' with your AWS credentials
 dynamodb = boto3.resource('dynamodb', region_name=aws_region, aws_access_key_id=access_key,
                           aws_secret_access_key=secret_key)
 travel_table = dynamodb.Table('content_table')
-user_table = dynamodb.Table('app_users')
+
+cred = credentials.Certificate("C:\\Users\\tpros\\Downloads\\dsci351-4624a-firebase-adminsdk-m1ufs-ec5baf6035.json")
+
+firebase_admin.initialize_app(cred, {
+    'databaseURL': 'https://dsci351-4624a-default-rtdb.firebaseio.com'
+})
 
 
 # Route for home page
@@ -28,16 +35,18 @@ def home():
 def register():
     if request.method == "POST":
         username = request.form["new-username"]
+        name = request.form["new-name"]
+        age = request.form["new-age"]
         password = request.form["new-password"]
         reentered_password = request.form["reenter-new-password"]
 
         if password == reentered_password:
-            result = db_create_user(username, password)
-            if result == "User created successfully":
+            result = db_create_user(username, password, name, age)
+            if result["success"]:
                 session["username"] = username
                 return redirect(url_for('profile'))
             else:
-                return render_template('home.html', error=result)
+                return render_template('home.html', error=result["message"])
         else:
             return render_template('home.html', error="Passwords do not match")
 
@@ -122,12 +131,17 @@ def edit_travel():
 
 # Function to check user credentials
 def db_check_creds(username, password):
-    response = user_table.get_item(Key={'username': username})
-    if 'Item' in response:
-        stored_password = response['Item']['password']
-        if stored_password == password:
-            return True
-    return False
+    ref = firebase_db.reference('/user')
+
+    user_data = ref.child(username).get()
+
+    if user_data is None:
+        return False, "User not found"  # User does not exist
+
+    if user_data.get("password") == password:
+        return True, "Credentials match"  # Username and password match
+    else:
+        return False, "Incorrect password"  # Password does not match
 
 
 def get_user_items():
@@ -141,20 +155,25 @@ def get_user_items():
 
 
 # Function to create a new user
-def db_create_user(username, password):
-    # Check if the username already exists
-    response = user_table.get_item(Key={'username': username})
-    if 'Item' in response:
-        return False, "Username already exists"
+def db_create_user(username, password, name, age):
+    data_path = f"/user/{username}"
 
-    # Store the user data in the table
+    data = {
+        "age": age,
+        "name": name,
+        "password": password,  # Store the hashed password
+        "username": username
+    }
+
+    # Get a reference to the Firebase database
+    ref = firebase_db.reference(data_path)
+
     try:
-        user_table.put_item(Item={'username': username, 'password': password})
-        return True, "User created successfully"
+        ref.set(data)
+        return {"success": True, "message": "User created successfully"}  # Return success dictionary
     except Exception as e:
-        # Log the exception or handle it accordingly
-        print(f"Error creating user: {e}")
-        return False, "Failed to create user"
+        return {"success": False, "message": f"Error creating user: {str(e)}"}  # Return error dictionary
+
 
 
 if __name__ == '__main__':
