@@ -128,17 +128,40 @@
     padding: 10px;
 }
 
+.toggle-bar-restaurant-edit {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        background-color: #f0f0f0;
+        padding: 10px;
+    }
+
 .toggle-icon {
     margin-right: 5px;
 }
 
-#edit-profile-fields {
+.toggle-edit-icon {
+        margin-right: 5px;
+    }
+
+#edit-restaurant-fields {
     display: none;
 }
 
-#edit-profile-fields.active {
+#edit-restaurant-fields.active {
     display: block;
 }
+
+#delete-restaurant-form-fields {
+    display: none;
+}
+
+#delete-restaurant-form-fields.active {
+    display: block;
+}
+
+
+
 </style>
 <body>
     <div class="sidebar">
@@ -158,7 +181,7 @@
             <div class="gallery__item">
                 <img src="{{ entry.imageURL.strip('\'') }}" alt="{{ entry.location }}" class="thumbnail__img">
                 <div class="overlay">
-                    <p><b>{{ entry.date }} | {{ entry.location }} | {{ entry.rating }} / 10</b></p>
+                    <p><b>{{ entry.name }} | {{ entry.date }} | {{ entry.item }} | {{ entry.location }} | {{ entry.rating }} / 10</b></p>
                     <p>{{ entry.comments }}</p>
                 </div>
             </div>
@@ -207,6 +230,81 @@
 
             <button type="submit" class="btn btn-primary">Add Restaurant Entry</button>
         </form>
+        <div class="toggle-bar-edit" tabindex="0">
+            <span class="toggle-icon">&#9660;</span> Edit Restaurant Entry
+        </div>
+        <form id="edit-restaurant-fields" action="/action/edit_restaurant" method="POST" class="hidden">
+            <div class="container">
+                {% for entry in entry %}
+                <div class="show-entries">
+                    <p>unique_id: {{ entry.unique_id }}</p>
+                    <p>Name: {{ entry.name }} | Date: {{ entry.date }} | Item: {{ entry.item }} | Rating: {{ entry.rating }}</p>
+                    <p> Location: {{ entry.location }} | Comments: {{ entry.comments }}</p>
+                    <p> ImageUrl: {{ entry.imageURL }} </p>
+                    <p>_____________________________________________________________________________________</p>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                <label for="unique_id">Unique_id of Entry you would like to edit:</label>
+                <input type="text" class="form-control" name="unique_id" required placeholder="unique_id">
+            </div>
+            <div class="form-group">
+                <label for="date">Date:</label>
+                <input type="text" class="form-control" name="date" required placeholder="YYYY-MM-DD">
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location:</label>
+                <input type="text" class="form-control" name="location" required placeholder="Los Angeles, California">
+            </div>
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" class="form-control" name="name" required placeholder="McDonald's">
+            </div>
+            <div class="form-group">
+                <label for="item">Item:</label>
+                <input type="text" class="form-control" name="item" required placeholder="Big Mac">
+            </div>
+
+            <div class="form-group">
+                <label for="rating">Trip Rating (1-10):</label>
+                <input type="number" class="form-control" name="rating" min="1" max="10" required placeholder="1-10">
+            </div>
+
+            <div class="form-group">
+                <label for="image">Image URL: </label>
+                <input type="text" class="form-control" name="image" required>
+            </div>
+
+            <div class="form-group">
+                <label for="comments">Comments:</label>
+                <textarea class="form-control" name="comments"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Edit Restaurant Entry</button>
+        </form>
+        <div class="toggle-bar-restaurant-edit" tabindex="0">
+            <span class="toggle-edit-icon">&#9660;</span> Delete Restaurant Entry
+        </div>
+        <form id="delete-restaurant-form-fields" action="/action/delete_restaurant" method="POST" class="hidden">
+            <div class="container">
+                {% for entry in entry %}
+                <div class="show-entries">
+                    <p>unique_id: {{ entry.unique_id }}</p>
+                    <p>Name: {{ entry.name }} | Date: {{ entry.date }} | Item: {{ entry.item }} | Rating: {{ entry.rating }}</p>
+                    <p> Location: {{ entry.location }} | Comments: {{ entry.comments }}</p>
+                    <p> ImageUrl: {{ entry.imageURL }} </p>
+                    <p>_____________________________________________________________________________________</p>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                <label for="unique_id">Unique_id of Entry you would like to edit:</label>
+                <input type="text" class="form-control" name="unique_id" required placeholder="unique_id">
+            </div>
+            <button type="submit" class="btn btn-primary">Delete Restaurant Entry</button>
+        </form>
         <form action="/logout" method="POST">
             <input type="submit" value="Log out">
         </form>
@@ -232,7 +330,7 @@
     });
         document.addEventListener("DOMContentLoaded", function () {
         const toggleBarEdit = document.querySelector('.toggle-bar-edit');
-        const editProfileFields = document.getElementById('edit-profile-fields');
+        const editProfileFields = document.getElementById('edit-restaurant-fields');
 
         toggleBarEdit.addEventListener('click', function () {
             editProfileFields.classList.toggle('active');
@@ -243,5 +341,18 @@
             }
         });
     });
+    document.addEventListener("DOMContentLoaded", function () {
+    const toggleBarEdit = document.querySelector('.toggle-bar-restaurant-edit'); // Corrected selector
+    const editRestaurantFields = document.getElementById('delete-restaurant-form-fields'); // Corrected ID
+
+    toggleBarEdit.addEventListener('click', function () {
+        editRestaurantFields.classList.toggle('active');
+        if (editRestaurantFields.classList.contains('active')) {
+            toggleBarEdit.querySelector('.toggle-edit-icon').innerHTML = '&#9650;'; // Up arrow
+        } else {
+            toggleBarEdit.querySelector('.toggle-edit-icon').innerHTML = '&#9660;'; // Down arrow
+        }
+    });
+});
 </script>
 </html>
