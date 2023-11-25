@@ -9,7 +9,7 @@ from firebase_admin import db as firebase_db
 app = Flask(__name__)
 app.secret_key = 'ABCDEFG123456789'
 
-aws_region = 'us-west-1'
+aws_region = 'us-east-2'
 access_key = ''
 secret_key = ''
 
@@ -18,7 +18,7 @@ dynamodb = boto3.resource('dynamodb', region_name=aws_region, aws_access_key_id=
                           aws_secret_access_key=secret_key)
 travel_table = dynamodb.Table('content_table')
 
-cred = credentials.Certificate("C:\\Users\\tpros\\Downloads\\dsci351-4624a-firebase-adminsdk-m1ufs-ec5baf6035.json")
+cred = credentials.Certificate("/Users/cnigro/Documents/DSCI 351/dsci351-4624a-firebase-adminsdk-m1ufs-8d148d89ee.json")
 
 firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://dsci351-4624a-default-rtdb.firebaseio.com'
@@ -78,6 +78,10 @@ def login():
         else:
             return render_template('home.html', error="Invalid credentials")
 
+
+@app.route('/update_profile', methods=["POST"])
+def update_profile():
+    return False
 
 # Route for user logout
 @app.route('/logout', methods=["POST"])
@@ -177,6 +181,7 @@ def restaurants():
     if 'username' in session:
         username = session['username']
         items = get_restaurants()
+        # nodes = get_nodes()
         print(items)
         return render_template('restaurants.html', user=username, entry=items)
     else:
@@ -205,6 +210,40 @@ def add_restaurant():
         firebase.post("/Restaurants/places", data)
     return redirect(url_for('restaurants'))
 
+
+@app.route('/action/edit_restaurant', methods=["POST"])
+def edit_restaurant():
+    """
+    updates the correct restaurant entry with the new information
+
+    :return: redirects to restaurants.html
+    """
+    unique_id = request.form['unique_id']
+    url = f'/Restaurants/places/{unique_id}'
+    data = {
+        "date": request.form['date'],
+        'comments': request.form['comments'],
+        'imageURL': request.form['image'],
+        'location': request.form['location'],
+        'rating': int(request.form['rating']),
+        'name': request.form['name'],
+        'item': request.form['item']
+    }
+
+    firebase.patch(url, data)
+    return redirect(url_for('restaurants'))
+
+
+@app.route('/action/delete_restaurant', methods=["POST"])
+def delete_restaurant():
+    """
+    deletes the restaurant entry that the user requested to delete
+
+    :return: redirects to restaurants.html
+    """
+    unique_id = request.form['unique_id']
+    firebase.delete('/Restaurants/places', unique_id)
+    return redirect(url_for('restaurants'))
 
 # Function to check user credentials
 def db_check_creds(username, password):
@@ -279,8 +318,14 @@ def get_restaurants():
     """
     username = session.get('username')
     result = firebase.get('/Restaurants/places', None)
-    user_items = [result[restaurant] for restaurant in result if result[restaurant]['username'] == username]
-    return user_items
+    ans = []
+    for entry in result:
+        if result[entry]['username'] == username:
+            temp = result[entry]
+            temp['unique_id'] = entry
+            ans.append(temp)
+
+    return ans
 
 
 
