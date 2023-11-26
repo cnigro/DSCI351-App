@@ -136,11 +136,23 @@
         padding: 10px;
     }
 
+.toggle-bar-restaurant-search {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        background-color: #f0f0f0;
+        padding: 10px;
+    }
+
 .toggle-icon {
     margin-right: 5px;
 }
 
 .toggle-edit-icon {
+        margin-right: 5px;
+    }
+
+.toggle-search-icon {
         margin-right: 5px;
     }
 
@@ -157,6 +169,14 @@
 }
 
 #delete-restaurant-form-fields.active {
+    display: block;
+}
+
+#search-restaurant-form-fields {
+    display: none;
+}
+
+#search-restaurant-form-fields.active {
     display: block;
 }
 
@@ -284,6 +304,21 @@
 
             <button type="submit" class="btn btn-primary">Edit Restaurant Entry</button>
         </form>
+        <div class="toggle-bar-restaurant-search" tabindex="0">
+            <span class="toggle-search-icon">&#9660;</span> Filter Restaurants
+        </div>
+        <form id="search-restaurant-form-fields" action="/action/search_restaurants" method="POST" class="hidden">
+            <div class="container">
+                <select name="place">
+                {% for location in locations %}
+                <OPTION value='{{location}}'>{{location}}</option>
+                {% endfor %}
+                    <OPTION value=''></option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Filter Restaurants </button>
+        </form>
+
         <div class="toggle-bar-restaurant-edit" tabindex="0">
             <span class="toggle-edit-icon">&#9660;</span> Delete Restaurant Entry
         </div>
@@ -341,6 +376,19 @@
             }
         });
     });
+    document.addEventListener("DOMContentLoaded", function () {
+    const toggleBarEdit = document.querySelector('.toggle-bar-restaurant-search'); // Corrected selector
+    const editRestaurantFields = document.getElementById('search-restaurant-form-fields'); // Corrected ID
+
+    toggleBarEdit.addEventListener('click', function () {
+        editRestaurantFields.classList.toggle('active');
+        if (editRestaurantFields.classList.contains('active')) {
+            toggleBarEdit.querySelector('.toggle-search-icon').innerHTML = '&#9650;'; // Up arrow
+        } else {
+            toggleBarEdit.querySelector('.toggle-search-icon').innerHTML = '&#9660;'; // Down arrow
+        }
+    });
+});
     document.addEventListener("DOMContentLoaded", function () {
     const toggleBarEdit = document.querySelector('.toggle-bar-restaurant-edit'); // Corrected selector
     const editRestaurantFields = document.getElementById('delete-restaurant-form-fields'); // Corrected ID
