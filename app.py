@@ -148,6 +148,11 @@ def add_travel():
 
 @app.route('/action/edit_travel', methods=['POST'])
 def edit_travel():
+    """
+    Edits a travel item to what the user submitted
+
+    :return: redirects back to profile.html
+    """
     travel_table.update_item(
         Key={
             'TripID': request.form['TripID']  # Specify the primary key of the item to update
@@ -171,6 +176,21 @@ def edit_travel():
     return redirect(url_for('profile'))
 
 
+@app.route('/action/delete_travel', methods=['POST'])
+def delete_travel():
+    """
+    Deletes item from the dynamoDB table
+
+    :return: redirects to profile.html
+    """
+    travel_table.delete_item(
+        Key={
+            'TripID': request.form['TripID']
+        }
+    )
+    return redirect(url_for('profile'))
+
+
 @app.route('/restaurants')
 def restaurants():
     """
@@ -181,9 +201,9 @@ def restaurants():
     if 'username' in session:
         username = session['username']
         items = get_restaurants()
-        # nodes = get_nodes()
+        places = get_locations()
         print(items)
-        return render_template('restaurants.html', user=username, entry=items)
+        return render_template('restaurants.html', user=username, entry=items, locations=places)
     else:
         return redirect(url_for('home'))
 
@@ -214,7 +234,7 @@ def add_restaurant():
 @app.route('/action/edit_restaurant', methods=["POST"])
 def edit_restaurant():
     """
-    updates the correct restaurant entry with the new information
+    Updates the correct restaurant entry with the new information
 
     :return: redirects to restaurants.html
     """
@@ -237,13 +257,34 @@ def edit_restaurant():
 @app.route('/action/delete_restaurant', methods=["POST"])
 def delete_restaurant():
     """
-    deletes the restaurant entry that the user requested to delete
+    Deletes the restaurant entry that the user requested to delete
 
     :return: redirects to restaurants.html
     """
     unique_id = request.form['unique_id']
     firebase.delete('/Restaurants/places', unique_id)
     return redirect(url_for('restaurants'))
+
+
+@app.route('/action/search_restaurants', methods=['POST'])
+def search_restaurants():
+    """
+    Looks for all the restaurants at one location
+
+    :return: restaurants.html displaying just one location or if location is empty display all restaurants
+    """
+    location = request.form['place']
+    # to get back to all restaurants choose the blank value
+    if location != '':
+        username = session['username']
+        items = get_restaurants()
+        filtered = filter_restaurants(items, location)
+        places = get_locations()
+
+        return render_template('restaurants.html', user=username, entry=filtered, locations=places)
+    else:
+        return redirect(url_for('restaurants'))
+
 
 # Function to check user credentials
 def db_check_creds(username, password):
@@ -267,11 +308,12 @@ def db_check_creds(username, password):
         return False, "Incorrect password"  # Password does not match
 
 
+
 def get_user_items():
     """
-    Gets the current users items from the travel table
+    Gets the current users' items from the travel table
 
-    :return: The current users travel logs
+    :return: The current users' travel logs
     """
     username = session.get('username')
     response = travel_table.scan()
@@ -324,6 +366,39 @@ def get_restaurants():
             temp = result[entry]
             temp['unique_id'] = entry
             ans.append(temp)
+
+    return ans
+
+
+def get_locations():
+    """
+    Gets all the locations that the user has inputted for the restaurants
+
+    :return: list of all the locations
+    """
+    items = get_restaurants()
+
+    locations = [item['location'] for item in items]
+
+    # makes sure there are no duplicates
+    locations = list(set(locations))
+
+    return locations
+
+
+def filter_restaurants(items, location):
+    """
+    Filters the user's restaurants to just the ones at the given location
+
+    :param items: list of all the current users' restaurants
+    :param location: location that the user wants to filter
+    :return: a list of all the restaurants at the given location
+    """
+
+    ans = []
+    for i in items:
+        if i['location'] == location:
+            ans.append(i)
 
     return ans
 
