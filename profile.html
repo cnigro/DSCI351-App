@@ -124,8 +124,23 @@
     #add-entry-form-fields.active {
         display: block;
     }
+    .toggle-bar-edit {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        background-color: #f0f0f0;
+        padding: 10px;
+    }
 
     .toggle-bar-travel-edit {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        background-color: #f0f0f0;
+        padding: 10px;
+    }
+
+    .toggle-bar-travel-delete {
         cursor: pointer;
         display: flex;
         align-items: center;
@@ -141,11 +156,23 @@
         margin-right: 5px;
     }
 
+    .toggle-delete-icon {
+        margin-right: 5px;
+    }
+
     #edit-travel-form-fields {
         display: none;
     }
 
     #edit-travel-form-fields.active {
+        display: block;
+    }
+
+    #delete-travel-form-fields {
+        display: none;
+    }
+
+    #delete-travel-form-fields.active {
         display: block;
     }
 
@@ -174,6 +201,7 @@
         <a href="{{ url_for('home') }}"><em>Home</em></a>
         <a href="{{ url_for('profile') }}"><em>Profile</em></a>
         <a href="{{ url_for('content') }}"><em>Content</em></a>
+        <a href="{{ url_for('restaurants') }}"><em>Restaurants</em></a>
     </div>
 
     <div class="container">
@@ -182,7 +210,6 @@
         <h2>Your Most Recent Travel History</h2>
 
         <div class="thumbnails">
-            <!-- Sample entries, replace with your dynamic data -->
             {% for entry in entry[:4]|sort(attribute='date', reverse=true) %}
             <div class="gallery__item">
                 <img src="{{ entry.imageURL.strip('\'') }}" alt="{{ entry.location }}" class="thumbnail__img">
@@ -271,9 +298,60 @@
 
             <button type="submit" class="btn btn-primary">Edit Travel Entry</button>
         </form>
+        <div class="toggle-bar-edit" tabindex="0">
+            <span class="toggle-icon">&#9660;</span> Edit Profile
+        </div>
+        <form id="edit-profile-fields" action="/update_profile" method="POST" class="hidden">
+            <div class="form-group">
+                <label for="current-username">Current Username:</label>
+                <input type="text" class="form-control" name="current-username" required placeholder="Current Username">
+            </div>
 
+            <div class="form-group">
+                <label for="current-password">Current Password:</label>
+                <input type="password" class="form-control" name="current-password" required placeholder="Current Password">
+            </div>
 
+            <div class="form-group">
+                <label for="new-username">New Username:</label>
+                <input type="text" class="form-control" name="new-username" placeholder="New Username">
+            </div>
+
+            <div class="form-group">
+                <label for="new-password">New Password:</label>
+                <input type="password" class="form-control" name="new-password" placeholder="New Password">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+        <div class="toggle-bar-travel-delete" tabindex="0">
+            <span class="toggle-delete-icon">&#9660;</span> Delete Travel Entry
+        </div>
+        <form id="delete-travel-form-fields" action="/action/delete_travel" method="POST" class="hidden">
+            <div class="container">
+                {% for entry in entry %}
+                <div class="show-entries">
+                    <p>TripID: {{ entry.TripID }}</p>
+                    <p>Date: {{ entry.date }} | Rating: {{ entry.rating }} | Location: {{ entry.location }} | Comments: {{ entry.comments }}</p>
+                    <p> ImageUrl: {{ entry.imageURL }} </p>
+                    <p>_____________________________________________________________________________________</p>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                <label for="TripID">TripID of Trip you would like to edit:</label>
+                <input type="text" class="form-control" name="TripID" required placeholder="TripID">
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+
+        <form action="/logout" method="POST">
+            <input type="submit" value="Log out">
+        </form>
+
+         <!--
         <a href="/logout">Logout</a>
+        -->
     </div>
 </body>
 <script>
@@ -313,6 +391,19 @@
             toggleBarEdit.querySelector('.toggle-edit-icon').innerHTML = '&#9650;'; // Up arrow
         } else {
             toggleBarEdit.querySelector('.toggle-edit-icon').innerHTML = '&#9660;'; // Down arrow
+        }
+    });
+});
+    document.addEventListener("DOMContentLoaded", function () {
+    const toggleBarEdit = document.querySelector('.toggle-bar-travel-delete'); // Corrected selector
+    const editTravelFields = document.getElementById('delete-travel-form-fields'); // Corrected ID
+
+    toggleBarEdit.addEventListener('click', function () {
+        editTravelFields.classList.toggle('active');
+        if (editTravelFields.classList.contains('active')) {
+            toggleBarEdit.querySelector('.toggle-delete-icon').innerHTML = '&#9650;'; // Up arrow
+        } else {
+            toggleBarEdit.querySelector('.toggle-delete-icon').innerHTML = '&#9660;'; // Down arrow
         }
     });
 });
